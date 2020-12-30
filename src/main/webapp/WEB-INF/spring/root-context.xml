@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+
+	<!-- db접속용 bean과 마이베이터스. 그리고 service class등록. -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"
+			value="net.sf.log4jdbc.DriverSpy" />
+		<property name="url"
+			value="jdbc:log4jdbc:oracle:thin:@127.0.0.1:1521:xe" />
+		<property name="username" value="bmanager" />
+		<property name="password" value="1234" />
+	</bean>
+
+	<!-- bean 을 가지고와서 쓸 때는 ref. 그냥 문자열을 가지고올 때는value. 즉 위의 것은 문자열을 씁니다. 예전프로젝트는 
+		드라이버를 직접 만들었죠? 그때 넣은 value 랑 똑같아요. -->
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+
+	</bean>
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<tx:annotation-driven/>
+	
+	<mybatis-spring:scan base-package="com.kotlin.board.dao"/>
+	<context:component-scan base-package="com.kotlin.board.service"/>
+	
+</beans>

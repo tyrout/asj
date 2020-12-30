@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- insert 나 select datate 등이 정의된 library라고 보면 됩니다. 
+이게 있으면 mapper 을 쓸 수 있어요 -->
+
+	<!-- list 라는게 mybatis 에는 없어요. 결과가 여러개가 오잖아요 그걸 하나씩 잡아서 
+	디티오며 하나씩 저장해서 ㅇ후에 알아서 리스트로 묶어서 전송합니ㅏㄷ.  
+	리턴이 문자열 리스트면 스트링을 resultType으로 하는거죠. 
+	반환이 List 일 경우 한 항목에 대한 Type 을 지정합니다. (list의 항목)
+	ㄱ리고 꺽쇄는 HTML 태그처럼 터리될 수 있기 때문에, 이걸 방지하기위해서, 
+	이렇게 해줘야 이건 태그가 아니라 순수한 문자열이다- 를 알려줄 수 있음. 
+	cdata. -->
+<mapper namespace="com.kotlin.board.dao.BoardDao">
+	<select id="getList" parameterType="Integer" resultType="com.kotlin.board.dto.BoardDto"> 
+	<![CDATA[
+	SELECT * FROM BLIST_1
+	WHERE RONUM >=#{pageNum}*10 - 9 AND RONUM <=#{pageNum}*10
+	]]>
+	</select>
+	
+	<select id="getBoardCnt" resultType="Integer">
+	SELECT COUNT(*) FROM BLIST_1 
+	</select>
+	
+	<!-- bnum 은 board dto 에 있는 녀석입니다. 
+	SEQUANCE의 값을 하나 증가시킬 거예요. 
+	keyproperty
+	# 같은 경우는 이 데이터타입이 인트면 '' 없이넣고, 스트링이면 '' 붙여서 넣어요
+	$기호는 모두 기호 없이 그대로 들어가요. 즉 숫자만 들어갈거면 $를 써도 된다는 거죠. 
+	이렇게 select를 해주면 bnumdms은 여기서 담기고, 나머지는 form 에서 담겨오겠죠.  -->
+	<insert id="boardInsert" parameterType="com.kotlin.board.dto.BoardDto" useGeneratedKeys="true" keyProperty="bnum">
+		<selectKey keyProperty="bnum" resultType="int" order="BEFORE">
+		SELECT BOARD_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO B VALUES(${bnum},#{btitle},#{bcontents},#{bid},DEFAULT,DEFAULT)
+	</insert>
+
+	<!--  마이바틱스에서는 기본적으로 boolean처럼 처리를 해주기 때문에  
+	그리고 여기서 sequence key 는 다른데서 쓸 일이 없기 때문에 따로 뭐 변수로 만들필요 x -->
+	<insert id="fileInsert" parameterType="HashMap">
+		INSERT INTO BF VALUES (BF_SEQ.NEXTVAL, #{bnum}, #{oriName}, #{sysName})
+	</insert>
+
+	<select id="getContents" parameterType="Integer"
+	resultType="com.kotlin.board.dto.BoardDto">
+	SELECT * FROM BLIST_1 WHERE BNUM=#{bnum}
+	</select>
+	
+	<select id="getBfList" parameterType="Integer" resultType="com.kotlin.board.dto.BfileDto">
+	SELECT * FROM BF WHERE BF_BNUM = #{bnum}
+	</select>
+	
+	<update id="viewUpdate" parameterType="Integer">
+	UPDATE BOARD SET B_VIEWS = B_VIEWS+1 WHERE B_NUM = #{bnum}
+	</update>
+	
+	<select id="getReplyList" parameterType="Integer" resultType="com.kotlin.board.dto.ReplyDto">
+	SELECT * FROM RLIST WHERE R_BNUM = #{bnum}
+	</select>
+	
+	<insert id="replyInsert" parameterType="com.kotlin.board.dto.ReplyDto">
+	INSERT INTO R VALUES(REPLY_SEQ.NEXTVAL, #{r_bnum},#{r_contents},#{r_id},DEFAULT)
+	</insert>
+
+	<update id="collectPoint" parameterType="String">
+	UPDATE MEMBER SET M_POINT = M_POINT+1 WHERE M_ID=#{id}
+	</update>
+	
+	<select id="getOriName" parameterType="String" resultType="String">
+	SELECT BF_ORINAME FROM BF WHERE BF_SYSNAME=#{sysName}
+	</select>
+
+	<update id="updatePostProc" parameterType="com.kotlin.board.dto.BoardDto">
+	UPDATE BOARD SET B_TITLE = #{btitle}, B_CONTENTS=#{bcontents}, B_DATE=SYSDATE WHERE B_NUM=#{bnum}
+	</update>
+	
+	<delete id="deleteAllComments" parameterType="Integer">
+	DELETE REPLY WHERE R_BNUM=#{postNum}
+	</delete>
+	
+	<delete id="deleteFileUploaded" parameterType="Integer">
+	DELETE FROM BOARDFILE WHERE BF_BNUM=#{postNum}
+	</delete>
+	
+	<delete id="deleteBoardPost" parameterType="Integer">
+	DELETE FROM BOARD WHERE B_NUM=#{postNum}
+	</delete>
+	
+	<delete id="deleteFileBySysName" parameterType="String">
+	DELETE FROM BOARDFILE WHERE BF_SYSNAME=#{sysname}
+	</delete>
+	
+
+</mapper>

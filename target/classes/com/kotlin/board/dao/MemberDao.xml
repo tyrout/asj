@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--  #{} 이 안에 들어가는건 dto 에요!!! 대문자쓰면 안됩니다!  -->
+<mapper namespace="com.kotlin.board.dao.MemberDao">
+
+	<insert id="memberInsert" parameterType="com.kotlin.board.dto.MemberDto">
+		INSERT INTO M VALUES (#{m_id},#{m_pwd},#{m_name},#{m_birth},#{m_addr},#{m_phone},DEFAULT)
+	</insert>
+
+	<select id="getEncPwd" parameterType="String" resultType="String">
+		SELECT M_PWD FROM M WHERE M_ID = #{m_id}
+	</select>
+	
+	
+	<select id="getMemeberInfo" parameterType="String" resultType="com.kotlin.board.dto.MemberDto">
+		SELECT * FROM MINFO WHERE M_ID=#{m_id}
+	</select>
+
+	<select id="countId" parameterType="String" resultType="int">
+		SELECT COUNT (M_ID) FROM MINFO WHERE M_ID = #{m_id}
+	</select>
+
+</mapper>
